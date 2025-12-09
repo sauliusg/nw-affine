@@ -11,6 +11,16 @@ procedure NW_Align is
    Default_Gap_Open_Penalty   : constant Integer := -4;
    Default_Gap_Extend_Penalty : constant Integer := -2;
    
+   type Direction_Type is (DIR_UNKNOWN, DIR_LEFT, DIR_DIAG, DIR_UP);
+   
+   type Cell_Type is record
+      Score : Long_Integer;
+      Direction : Direction_Type;
+   end record;
+   
+   type Cell_Matrix_Type is array
+     (Integer range <>, Integer range <>) of Cell_Type;
+   
    procedure Align
      (
       Seq1, Seq2 : in Unbounded_String;
@@ -21,6 +31,10 @@ procedure NW_Align is
       Gap_Open_Penalty   : Integer := Default_Gap_Open_Penalty; 
       Gap_Extend_Penalty : Integer := Default_Gap_Extend_Penalty
      ) is
+      
+      type Matrix_Type is new
+        Cell_Matrix_Type (0 .. Length (Seq1), 0 .. Length (Seq2));
+      
    begin
       null;
    end;
