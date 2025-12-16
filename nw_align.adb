@@ -6,6 +6,8 @@ with FASTA; use FASTA;
 
 procedure NW_Align is
    
+   INCOMPLETE_MATRIX : exception;
+   
    Default_Match_Score        : constant Integer := 1;
    Default_Mismatch_Penalty   : constant Integer := -1;
    Default_Gap_Open_Penalty   : constant Integer := -4;
@@ -122,7 +124,54 @@ procedure NW_Align is
       -- Debug printout of the matrix:
       Put (Cell_Matrix_Type (M)); -- debug print the matrix
       New_Line;
-   end;
+      
+      -- Now we know the final aligment score:
+      declare
+         X : Integer := M'Last(1);
+         Y : Integer := M'Last(2);
+      begin
+         Score := M (X,Y).Score;
+      end;
+      
+      -- Back-tracking and construction of the alignment strings:
+
+      declare
+         Rev1 : Unbounded_String := Null_Unbounded_String;
+         Rev2 : Unbounded_String := Null_Unbounded_String;
+         I  : Integer := M'Last(1);
+         J  : Integer := M'Last(2);
+      begin
+         while I > 0 or J > 0 loop
+            Put_Line ("I = " & I'Image & " J = " & J'Image);
+            case M (I,J).Direction is
+               when DIR_UP =>
+                  Append (Rev1, Element (Seq1, I));
+                  Append (Rev2, '-');
+                  I := I - 1;
+               when DIR_LEFT =>
+                  Append (Rev1, '-');
+                  Append (Rev2, Element (Seq2, J));
+                  J := J - 1;
+               when DIR_DIAG =>
+                  Append (Rev1, Element (Seq1, I));
+                  Append (Rev2, Element (Seq2, J));
+                  I := I - 1;
+                  J := J - 1;
+               when DIR_UNKNOWN =>
+                  raise INCOMPLETE_MATRIX with
+                    "alignment matrix element " & I'Image & ", " & J'Image &
+                    "was not computed";
+            end case;
+         end loop;
+         for I in reverse 1 .. Length (Rev1) loop
+            Append (Aln1, Element (Rev1, I));
+         end loop;
+         for J in reverse 1 .. Length (Rev2) loop
+            Append (Aln2, Element (Rev2, J));
+         end loop;
+      end;
+      
+   end Align;
    
    S1, S2 : Unbounded_String;
    
@@ -138,8 +187,14 @@ begin
    declare
       Aln1, Aln2 : Unbounded_String;
       Score : Long_Integer;
+      
+      function "+" (US : Unbounded_String) return String is
+        (To_String (US));
+      
    begin
       Align (S1, S2, Aln1, Aln2, Score);
+      Put_Line (+Aln1);
+      Put_Line (+Aln2);
    end;
    
 end;
