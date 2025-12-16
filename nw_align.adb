@@ -77,7 +77,49 @@ procedure NW_Align is
       end loop;
       
       -- Dynamic programming will go here:
+      for I in M'First(1) + 1 .. M'Last(1) loop
+         for J in M'First(2) + 1 .. M'Last(2) loop
+            declare
+               Score_Up   : Long_Integer := M (I - 1, J).Score;
+               Score_Left : Long_Integer := M (I, J - 1).Score;
+               Score_Diag : Long_Integer := M (I - 1, J - 1).Score;
+               Max_Score : Long_Integer;
+            begin
+               if Element (Seq1, I) = Element (Seq2, J) then
+                  Score_Diag := Score_Diag + Long_Integer (Match_Score);
+               else
+                  Score_Diag := Score_Diag + Long_Integer (Mismatch_Penalty);
+               end if;
+               
+               if M (I - 1, J).Direction = DIR_DIAG then
+                  Score_Up := Score_Up + Long_Integer (Gap_Open_Penalty);
+               else
+                  Score_Up := Score_Up + Long_Integer (Gap_Extend_Penalty);
+               end if;
+               
+               if M (I, J - 1).Direction = DIR_DIAG then
+                  Score_Left := Score_Left + Long_Integer (Gap_Open_Penalty);
+               else
+                  Score_Left := Score_Left + Long_Integer (Gap_Extend_Penalty);
+               end if;
+               
+               Max_Score := Long_Integer'Max
+                 (Long_Integer'Max (Score_Up, Score_Left), Score_Diag);
+               
+               M (I,J).Score := Max_Score;
+               
+               if Max_Score = Score_Up then
+                  M (I,J).Direction := DIR_UP;
+               elsif Max_Score = Score_Left then
+                  M (I,J).Direction := DIR_LEFT;
+               else
+                  M (I,J).Direction := DIR_DIAG;
+               end if;
+            end;
+         end loop;
+      end loop;
       
+      -- Debug printout of the matrix:
       Put (Cell_Matrix_Type (M)); -- debug print the matrix
       New_Line;
    end;
