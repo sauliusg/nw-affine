@@ -74,7 +74,7 @@ procedure NW_Align is
             Score => M (0, J - 1).Score +
               (if J = 1 then Long_Integer (Gap_Open_Penalty) 
                         else Long_Integer (Gap_Extend_Penalty)),
-            Direction => DIR_UP
+            Direction => DIR_LEFT
            );
       end loop;
       
