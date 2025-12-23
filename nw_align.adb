@@ -110,10 +110,10 @@ procedure NW_Align is
                
                M (I,J).Score := Max_Score;
                
-               if Max_Score = Score_Up then
+               if Max_Score = Score_Left then
+                  M (I,J).Direction := DIR_Left;
+               elsif Max_Score = Score_Up then
                   M (I,J).Direction := DIR_UP;
-               elsif Max_Score = Score_Left then
-                  M (I,J).Direction := DIR_LEFT;
                else
                   M (I,J).Direction := DIR_DIAG;
                end if;
@@ -193,6 +193,7 @@ begin
       
    begin
       Align (S1, S2, Aln1, Aln2, Score);
+      Put_Line ("Score:" & ASCII.HT & Score'Image);
       Put_Line (+Aln1);
       Put_Line (+Aln2);
    end;
